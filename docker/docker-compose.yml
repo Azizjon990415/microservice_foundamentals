@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  songdb:
+    image: postgres:latest
+    container_name: songdb
+    environment:
+      POSTGRES_DB: songdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - songdb_data:/var/lib/postgresql/data
+
+  resourcedb:
+    image: postgres:latest
+    container_name: resourcedb
+    environment:
+      POSTGRES_DB:
+        
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - resourcedb_data:/var/lib/postgresql/data
+
+volumes:
+  songdb_data:
+  resourcedb_data:
