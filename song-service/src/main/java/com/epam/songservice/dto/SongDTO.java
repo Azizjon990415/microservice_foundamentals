@@ -18,27 +18,27 @@ public class SongDTO {
     @NotNull
     @Positive
     private Long id;
-
+    @NotNull
     @NotBlank
     @Size(max = 100)
     private String name;
-
+    @NotNull
     @NotBlank
     @Size(max = 100)
     private String artist;
-
+    @NotNull
     @NotBlank
     @Size(max = 100)
     private String album;
-
+    @NotNull
     @NotBlank
     @Size(max = 10)
     private String length;
-
+    @NotNull
     @NotNull
     @Positive
     private Long resourceId;
-
+    @NotNull
     @NotBlank
     @Size(max = 4)
     private String year;

@@ -1,0 +1,2 @@
+i have pushed all apps to git
+https://git.epam.com/azizjon_mirzaahmatov1/microservice-foundamentals
