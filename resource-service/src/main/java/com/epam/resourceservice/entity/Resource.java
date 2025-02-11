@@ -12,7 +12,7 @@ public class Resource {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
+    @Column(name = "data", columnDefinition="bytea")
     private byte[] data;
 
     // Getters and Setters

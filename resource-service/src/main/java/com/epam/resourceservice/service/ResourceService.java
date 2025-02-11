@@ -8,6 +8,7 @@ import com.epam.resourceservice.exception.ResourceNotFoundException;
 import com.epam.resourceservice.repository.ResourceRepository;
 import com.groupdocs.metadata.Mp3Format;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +24,8 @@ public class ResourceService {
     @Autowired
     private ResourceRepository resourceRepository;
     private RestTemplate restTemplate = new RestTemplate();
+    @Value("${song.service.url}")
+    private String songServiceUrl;
 
     public void isMp3File(byte[] file) {
         if (file.length < 3) {
@@ -64,7 +67,7 @@ public class ResourceService {
                 mp3Format.getId3v2Properties().getDate()
         );
         try {
-            SongDTO songDTO1 = restTemplate.postForObject("http://localhost:91/songs", songDTO, SongDTO.class);
+            SongDTO songDTO1 = restTemplate.postForObject(songServiceUrl, songDTO, SongDTO.class);
         }catch (Exception e){
             throw new RuntimeException("Song service unavailable", e);
         }
@@ -89,7 +92,7 @@ public class ResourceService {
                 .toList();
         idList.removeAll(notFoundIds);
         resourceRepository.deleteAllById(idList);
-        restTemplate.delete("http://localhost:91/songs?id="+idList.stream()
+        restTemplate.delete(songServiceUrl+"?id="+idList.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining(",")), Map.class);
         return Map.of("ids", idList, "not_found_ids", notFoundIds);

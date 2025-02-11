@@ -1,0 +1,8 @@
+SONGDB_NAME=songdb
+SONGDB_USER=user
+SONGDB_PASSWORD=password
+RESOURCEDB_NAME=resourcedb
+RESOURCEDB_USER=user
+RESOURCEDB_PASSWORD=password
+SONG_DB_URL=jdbc:postgresql://songdb:5432/songdb
+RESOURCE_DB_URL=jdbc:postgresql://resourcedb:5432/resourcedb

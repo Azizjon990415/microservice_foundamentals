@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  song-db:
+    image: postgres:16-alpine
+    container_name: song-db
+    environment:
+      POSTGRES_DB: ${SONGDB_NAME}
+      POSTGRES_USER: ${SONGDB_USER}
+      POSTGRES_PASSWORD: ${SONGDB_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - songdb_data:/var/lib/postgresql/data
+      - ./init-scripts/songdb:/docker-entrypoint-initdb.d
+
+  resource-db:
+    image: postgres:16-alpine
+    container_name: resource-db
+    environment:
+      POSTGRES_DB: ${RESOURCEDB_NAME}
+      POSTGRES_USER: ${RESOURCEDB_USER}
+      POSTGRES_PASSWORD: ${RESOURCEDB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - resourcedb_data:/var/lib/postgresql/data
+      - ./init-scripts/resourcedb:/docker-entrypoint-initdb.d
+
+  microservice1:
+    build: ./song-service
+    container_name: microservice1
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${SONG_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${SONGDB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${SONGDB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_FLYWAY_ENABLED: false
+
+  microservice2:
+    build: ./resource-service
+    container_name: microservice2
+    ports:
+      - "8081:8081"
+    environment:
+      SONG_SERVICE_URL: ${SONG_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${RESOURCE_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${RESOURCEDB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${RESOURCEDB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_FLYWAY_ENABLED: false
+
+volumes:
+  songdb_data:
+  resourcedb_data:
