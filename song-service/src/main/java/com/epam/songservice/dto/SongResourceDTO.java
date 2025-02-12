@@ -1,22 +1,22 @@
 package com.epam.songservice.dto;
 
 import com.epam.songservice.entity.Song;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SongDTO {
+public class SongResourceDTO {
 
-    @NotNull
-    @Positive
+
     private Long id;
     @NotNull
     @NotBlank
@@ -33,20 +33,23 @@ public class SongDTO {
     @NotNull
     @NotBlank
     @Size(max = 10)
-    private String duration;
-
-
+    private String length;
+    @NotNull
+    @NotNull
+    @Positive
+    private Long resourceId;
     @NotNull
     @NotBlank
     @Size(max = 4)
     private String year;
 
-    public  SongDTO(Song song) {
+    public SongResourceDTO(Song song) {
         this.id = song.getId();
         this.name = song.getName();
         this.artist = song.getArtist();
         this.album = song.getAlbum();
-        this.duration = song.getLength();
+        this.length = song.getLength();
+        this.resourceId = song.getResourceId();
         this.year = song.getYear();
     }
 }

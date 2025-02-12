@@ -1,6 +1,7 @@
 package com.epam.songservice.service;
 
 import com.epam.songservice.dto.SongDTO;
+import com.epam.songservice.dto.SongResourceDTO;
 import com.epam.songservice.entity.Song;
 import com.epam.songservice.exception.BadRequestException;
 import com.epam.songservice.exception.ResourceNotFoundException;
@@ -20,7 +21,7 @@ public class SongService {
     @Autowired
     private SongRepository songRepository;
 
-    public SongDTO createSong(SongDTO songDTO) {
+    public SongDTO createSong(SongResourceDTO songDTO) {
         return new SongDTO(songRepository.save(new Song(songDTO)));
     }
 

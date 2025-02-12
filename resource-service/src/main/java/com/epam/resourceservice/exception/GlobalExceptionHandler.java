@@ -7,9 +7,11 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.validation.ConstraintViolationException;
+import javax.ws.rs.ClientErrorException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,7 +46,13 @@ public class GlobalExceptionHandler {
             throw new BadRequestException(ex.getMessage());
         }
         if (ex instanceof ConstraintViolationException) {
-            throw new BadRequestException(ex.getMessage());
+            ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), String.valueOf(HttpStatus.BAD_REQUEST.value()));
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+        if (ex instanceof HttpClientErrorException) {
+            ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
         ErrorResponse errorResponse = new ErrorResponse("An unexpected error occurred", String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

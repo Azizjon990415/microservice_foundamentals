@@ -1,6 +1,7 @@
 package com.epam.resourceservice.controller;
 
 import com.epam.resourceservice.DTO.ResourceDTO;
+import com.epam.resourceservice.exception.BadRequestException;
 import com.epam.resourceservice.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,6 @@
-CREATE TABLE Resource (
-                          id BIGSERIAL PRIMARY KEY,
-                          data BYTEA NOT NULL
+create table resource
+(
+    id   bigserial
+        primary key,
+    data bytea not null
 );

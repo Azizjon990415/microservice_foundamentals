@@ -1,14 +1,15 @@
 package com.epam.songservice.controller;
 
 import com.epam.songservice.dto.SongDTO;
+import com.epam.songservice.dto.SongResourceDTO;
 import com.epam.songservice.service.SongService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.Map;
 @Validated
@@ -19,7 +20,7 @@ public class SongController {
     private SongService songService;
 
     @PostMapping(value = "", produces = "application/json")
-    public ResponseEntity<Map<String, Long>> createSong(@Valid @RequestBody SongDTO songDTO) {
+    public ResponseEntity<Map<String, Long>> createSong(@RequestBody @Valid SongResourceDTO songDTO) {
         return ResponseEntity.ok(Map.of("id", songService.createSong(songDTO).getId()));
     }
 

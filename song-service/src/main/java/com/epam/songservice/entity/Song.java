@@ -1,6 +1,7 @@
 package com.epam.songservice.entity;
 
 import com.epam.songservice.dto.SongDTO;
+import com.epam.songservice.dto.SongResourceDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,12 +34,15 @@ public class Song {
     @Column(name = "year")
     private String year;
 
-    public Song(SongDTO songDTO) {
+    public Song(SongResourceDTO songDTO) {
         this.name = songDTO.getName();
         this.artist = songDTO.getArtist();
         this.album = songDTO.getAlbum();
         this.length = songDTO.getLength();
         this.resourceId = songDTO.getResourceId();
+        if (!songDTO.getYear().matches("\\d{4}")) {
+            throw new IllegalArgumentException("Year must be in the format YYYY");
+        }
         this.year = songDTO.getYear();
     }
 
