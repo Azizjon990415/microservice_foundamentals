@@ -57,6 +57,12 @@ public class ResourceService {
         Resource resource = new Resource();
         resource.setData(file);
         Resource saved;
+        try {
+            SongDTO songDTO1 = restTemplate.getForObject(songServiceUrl+"/get-last-song", SongDTO.class);
+            resource.setId(songDTO1.getId()+1L);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         saved = resourceRepository.save(resource);
         saveSongMetadata(saved, file);
         return new ResourceDTO(saved.getId());
@@ -81,6 +87,7 @@ public class ResourceService {
                throw new BadRequestException("Invalid MP3 file");
            }
            songDTO = new SongDTO(
+                   saved.getId(),
                   saved.getId(),
                   metadata.get(Metadata.TITLE),
                   metadata.get(XMPDM.ARTIST)!=null?metadata.get(XMPDM.ARTIST):metadata.get("Author"),
@@ -99,6 +106,7 @@ public class ResourceService {
         try {
             SongDTO songDTO1 = restTemplate.postForObject(songServiceUrl, songDTO, SongDTO.class);
         }catch (Exception e){
+            e.printStackTrace();
             throw new RuntimeException("Song service unavailable", e);
         }
     }

@@ -4,6 +4,7 @@ import com.epam.songservice.dto.SongDTO;
 import com.epam.songservice.dto.SongResourceDTO;
 import com.epam.songservice.entity.Song;
 import com.epam.songservice.exception.BadRequestException;
+import com.epam.songservice.exception.ConflictException;
 import com.epam.songservice.exception.ResourceNotFoundException;
 import com.epam.songservice.repository.SongRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +23,17 @@ public class SongService {
     private SongRepository songRepository;
 
     public SongDTO createSong(SongResourceDTO songDTO) {
+        if (songRepository.existsByResourceId(songDTO.getId())) {
+            throw new ConflictException("Song already exists with this resource ID");
+        }
         return new SongDTO(songRepository.save(new Song(songDTO)));
     }
 
     public SongDTO getSongByResourceId(Long id) {
         return new SongDTO(songRepository.findByResourceId(id).orElseThrow(() -> new ResourceNotFoundException("Song not found")));
+    }
+    public SongDTO findFirstByOrderByIdDesc() {
+        return new SongDTO(songRepository.findFirstByOrderByIdDesc().orElseThrow(() -> new ResourceNotFoundException("Song not found")));
     }
     @Transactional
     public Map<String,List<Long>> deleteSongs(String ids) {
@@ -44,6 +51,6 @@ public class SongService {
                 .toList();
         idList.removeAll(notFoundIds);;
         songRepository.deleteAllByResourceIdIn(idList);
-        return Map.of("ids", idList, "not_found_ids", notFoundIds);
+        return Map.of("ids", idList);
     }
 }

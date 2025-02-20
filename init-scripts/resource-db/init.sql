@@ -1,6 +1,5 @@
 create table resource
 (
-    id   bigserial
-        primary key,
+    id   bigserial primary key,
     data bytea not null
 );

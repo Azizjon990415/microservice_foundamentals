@@ -1,6 +1,8 @@
 package com.epam.songservice.dto;
 
 import com.epam.songservice.entity.Song;
+import com.epam.songservice.exception.DurationFormat;
+import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,7 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 
 @Data
@@ -33,9 +35,8 @@ public class SongResourceDTO {
     @NotNull
     @NotBlank
     @Size(max = 10)
-    private String length;
-    @NotNull
-    @NotNull
+    @DurationFormat
+    private String duration;
     @Positive
     private Long resourceId;
     @NotNull
@@ -48,7 +49,7 @@ public class SongResourceDTO {
         this.name = song.getName();
         this.artist = song.getArtist();
         this.album = song.getAlbum();
-        this.length = song.getLength();
+        this.duration = song.getLength();
         this.resourceId = song.getResourceId();
         this.year = song.getYear();
     }

@@ -10,4 +10,5 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     Optional<Song> findByResourceId(Long resourceId);
     void deleteAllByResourceIdIn(List<Long> resourceIds);
     boolean existsByResourceId(Long resourceId);
+    Optional<Song> findFirstByOrderByIdDesc();
 }

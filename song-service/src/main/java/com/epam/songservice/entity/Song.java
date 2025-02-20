@@ -35,10 +35,11 @@ public class Song {
     private String year;
 
     public Song(SongResourceDTO songDTO) {
+        this.id=songDTO.getId();
         this.name = songDTO.getName();
         this.artist = songDTO.getArtist();
         this.album = songDTO.getAlbum();
-        this.length = songDTO.getLength();
+        this.length = songDTO.getDuration();
         this.resourceId = songDTO.getResourceId();
         if (!songDTO.getYear().matches("\\d{4}")) {
             throw new IllegalArgumentException("Year must be in the format YYYY");

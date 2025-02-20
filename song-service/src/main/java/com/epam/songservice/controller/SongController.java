@@ -28,6 +28,10 @@ public class SongController {
     public ResponseEntity<SongDTO> getSongByResourceId(@PathVariable @Positive Long id) {
         return ResponseEntity.ok(songService.getSongByResourceId(id));
     }
+    @GetMapping(value="/get-last-song", produces = "application/json")
+    public ResponseEntity<SongDTO> getLastSong() {
+        return ResponseEntity.ok(songService.findFirstByOrderByIdDesc());
+    }
 
     @DeleteMapping(value = "", produces = "application/json")
     public ResponseEntity<Map<String, List<Long>>> deleteSongs(@RequestParam String id) {
