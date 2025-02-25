@@ -2,7 +2,7 @@ package com.epam.songservice.entity;
 
 import com.epam.songservice.dto.SongDTO;
 import com.epam.songservice.dto.SongResourceDTO;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

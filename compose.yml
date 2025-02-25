@@ -25,14 +25,16 @@ services:
 
   song-service:
     build: ./song-service
-    container_name: song-service
+    deploy:
+      replicas: 2
     ports:
-      - "8080:8080"
+      - "8079-8080:8080"
     environment:
       SPRING_DATASOURCE_URL: ${SONG_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${SONGDB_USER}
       SPRING_DATASOURCE_PASSWORD: ${SONGDB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      EUREKA_URI: ${EUREKA_URI}
 
   resource-service:
     build: ./resource-service
@@ -45,3 +47,9 @@ services:
       SPRING_DATASOURCE_USERNAME: ${RESOURCEDB_USER}
       SPRING_DATASOURCE_PASSWORD: ${RESOURCEDB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      EUREKA_URI: ${EUREKA_URI}
+  eureka:
+    build: ./eureka
+    container_name: eureka
+    ports:
+      - "8761:8761"
