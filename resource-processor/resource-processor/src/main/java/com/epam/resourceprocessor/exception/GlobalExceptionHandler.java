@@ -1,4 +1,4 @@
-package com.epam.resourceservice.exception;
+package com.epam.resourceprocessor.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
