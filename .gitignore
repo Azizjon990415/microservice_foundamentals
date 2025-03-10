@@ -1,3 +1,4 @@
 /.idea/
 /song-service/song-service/gradle/
 .env
+/documents/

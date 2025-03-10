@@ -12,6 +12,5 @@ public class Resource {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     // Getters and Setters
 }

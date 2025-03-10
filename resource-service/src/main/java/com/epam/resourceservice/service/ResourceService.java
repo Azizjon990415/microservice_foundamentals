@@ -63,6 +63,10 @@ public class ResourceService {
 
     }
 
+    public byte[] getResource(Long id) {
+        return awss3Service.getFile(id.toString());
+    }
+
     private void saveSongMetadata(Resource saved, byte[] file) {
         SongDTO songDTO;
         songDTO = getSongMetaData(saved, file);
@@ -79,9 +83,6 @@ public class ResourceService {
         return new SongDTO();
     }
 
-    public byte[] getResource(Long id) {
-        return awss3Service.getFile(id.toString());
-    }
 
     @Transactional
     public Map<String, List<Long>> deleteResources(String ids) {
