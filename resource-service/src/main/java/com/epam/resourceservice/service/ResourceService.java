@@ -24,8 +24,6 @@ public class ResourceService {
     @Autowired
     private AWSS3Service awss3Service;
     private RestTemplate restTemplate = new RestTemplate();
-    @Value("${song.service.url}")
-    private String songServiceUrl;
 
     public void isMp3File(byte[] file) {
         if (file.length < 3) {
@@ -47,18 +45,12 @@ public class ResourceService {
     public ResourceDTO saveResource(byte[] file) {
         Resource resource = new Resource();
         Resource saved;
-        try {
-            SongDTO songDTO1 = restTemplate.getForObject(songServiceUrl + "/get-last-song", SongDTO.class);
-            resource.setId(songDTO1.getId() + 1L);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         if (awss3Service.saveSongFile(resource, file)) {
             saved = resourceRepository.save(resource);
         } else {
             throw new RuntimeException("Error saving file");
         }
-//        saveSongMetadata(saved, file);
         return new ResourceDTO(saved.getId());
 
     }
@@ -67,28 +59,8 @@ public class ResourceService {
         return awss3Service.getFile(id.toString());
     }
 
-    private void saveSongMetadata(Resource saved, byte[] file) {
-        SongDTO songDTO;
-        songDTO = getSongMetaData(saved, file);
-        try {
-            SongDTO songDTO1 = restTemplate.postForObject(songServiceUrl, songDTO, SongDTO.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Song service unavailable", e);
-        }
-    }
-
-    private SongDTO getSongMetaData(Resource saved, byte[] file) {
-        //call resource Processor
-        return new SongDTO();
-    }
-
-
     @Transactional
     public Map<String, List<Long>> deleteResources(String ids) {
-//        if (ids == null || ids.isEmpty()) {
-//            throw new BadRequestException("IDs parameter cannot be empty");
-//        }
         if (ids.length() > 200) {
             throw new BadRequestException("The CSV string exceeds the maximum allowed length of 200 characters");
         }
@@ -99,11 +71,9 @@ public class ResourceService {
                 .filter(id -> !resourceRepository.existsById(id))
                 .toList();
         idList.removeAll(notFoundIds);
-        resourceRepository.deleteAllById(idList);
-        if (idList.size() > 0)
-            restTemplate.delete(songServiceUrl + "?id=" + idList.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(",")), Map.class);
+        if (!awss3Service.deleteFiles(idList)){
+            throw new RuntimeException("Error deleting files");
+        }
         return Map.of("ids", idList);
     }
 

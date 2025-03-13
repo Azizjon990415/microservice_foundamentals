@@ -9,17 +9,14 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Paths;
+import java.util.List;
 
 @Service
 public class AWSS3Service {
@@ -98,5 +95,32 @@ public class AWSS3Service {
 
         return buffer;
     }
+    public boolean deleteFile(String key) {
+            // Creating the DELETE request with all the relevant information.
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(BUCKET_NAME)
+                    .key(key)
+                    .build();
 
+            // Deleting the object from the bucket.
+            s3Client.deleteObject(deleteObjectRequest);
+        try {
+            s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(BUCKET_NAME)
+                    .key(key)
+                    .build());
+            return false; // File still exists
+        } catch (NoSuchKeyException e) {
+            return true; // File is deleted
+        }
+    }
+    public boolean deleteFiles(List<Long> keys) {
+        boolean allDeleted = true;
+        for (Long key : keys) {
+            if (!deleteFile(key.toString())) {
+                allDeleted = false;
+            }
+        }
+        return allDeleted;
+    }
 }
