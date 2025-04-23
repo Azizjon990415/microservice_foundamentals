@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.kafka.core.KafkaTemplate;
 
 @Service
 public class ResourceService {
@@ -23,7 +24,10 @@ public class ResourceService {
     private ResourceRepository resourceRepository;
     @Autowired
     private AWSS3Service awss3Service;
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
     private RestTemplate restTemplate = new RestTemplate();
+
 
     public void isMp3File(byte[] file) {
         if (file.length < 3) {
@@ -43,14 +47,14 @@ public class ResourceService {
     }
 
     public ResourceDTO saveResource(byte[] file) {
-        Resource resource = new Resource();
-        Resource saved;
+        Resource saved=resourceRepository.save(new Resource());
 
-        if (awss3Service.saveSongFile(resource, file)) {
-            saved = resourceRepository.save(resource);
+        if (awss3Service.saveSongFile(saved, file)) {
+            saved = resourceRepository.save(saved);
         } else {
             throw new RuntimeException("Error saving file");
         }
+        kafkaProducerService.sendResourceUploadedMessage(saved.getId());
         return new ResourceDTO(saved.getId());
 
     }

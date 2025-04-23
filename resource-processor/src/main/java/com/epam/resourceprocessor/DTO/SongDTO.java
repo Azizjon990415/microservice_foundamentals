@@ -1,14 +1,13 @@
 package com.epam.resourceprocessor.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-@AllArgsConstructor
 public class SongDTO {
-    private Long id;
     private Long resourceId;
     private String name;
     private String artist;
@@ -23,5 +22,29 @@ public class SongDTO {
         this.album = album;
         this.duration = length;
         this.year = year;
+    }
+    @JsonProperty
+    public Long getResourceId() {
+        return resourceId;
+    }
+    @JsonProperty
+    public String getName() {
+        return name;
+    }
+    @JsonProperty
+    public String getArtist() {
+        return artist;
+    }
+    @JsonProperty
+    public String getAlbum() {
+        return album;
+    }
+    @JsonProperty
+    public String getDuration() {
+        return duration;
+    }
+    @JsonProperty
+    public String getYear() {
+        return year;
     }
 }

@@ -49,6 +49,22 @@ services:
       AWS_URL: ${AWS_URL}
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
       EUREKA_URI: ${EUREKA_URI}
+      KAFKA_URL: ${KAFKA_URL}
+      KAFKA_TOPIC_RESOURCE: ${KAFKA_TOPIC_RESOURCE}
+      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID}
+  resource-processor:
+    build: ./resource-processor
+    container_name: resource-processor
+    ports:
+      - "8083:8083"
+    environment:
+      SONG_SERVICE_URL: ${SONG_SERVICE_URL}
+      RESOURCE_SERVICE_URL: ${RESOURCE_SERVICE_URL}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      EUREKA_URI: ${EUREKA_URI}
+      KAFKA_URL: ${KAFKA_URL}
+      KAFKA_TOPIC_RESOURCE: ${KAFKA_TOPIC_RESOURCE}
+      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID}
   eureka:
     build: ./eureka
     container_name: eureka
@@ -67,3 +83,76 @@ services:
       - "./localstack:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./localstack/init:/etc/localstack/init/ready.d"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.1.2
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka1:
+    image: confluentinc/cp-server:7.1.2
+    depends_on:
+      - zookeeper
+    ports:
+      - "19092:19092"
+      - "1092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:19092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka2:
+    image: confluentinc/cp-server:7.1.2
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+      - "2092:9092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+
+
+  kafka3:
+    image: confluentinc/cp-server:7.1.2
+    depends_on:
+      - zookeeper
+    ports:
+      - "39092:39092"
+      - "3092:9092"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092,PLAINTEXT_HOST://localhost:39092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    ports:
+      - "8090:8080"
+    restart: always
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: PLAINTEXT://kafka:9092,PLAINTEXT://kafka2:9092,PLAINTEXT://kafka3:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+        window: 15s

@@ -1,11 +1,15 @@
 package com.epam.resourceservice.service;
 
 import com.epam.resourceservice.entity.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -45,7 +49,11 @@ public class AWSS3Service {
 
                 .build();
     }
-
+    @Retryable(
+            include = { Exception.class },
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 5000)
+    )
     public Boolean saveSongFile(Resource saved, byte[] file) {
         // Creating the PUT request with all the relevant information.
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -66,35 +74,37 @@ public class AWSS3Service {
         ResponseInputStream<GetObjectResponse> savedResponse = s3Client.getObject(getObjectRequest);
         return savedResponse != null && savedResponse.response() != null && savedResponse.response().getClass().equals(GetObjectResponse.class);
     }
-
-    public byte[] getFile(String key) {
-        // Creating the GET request with all the relevant information.
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(BUCKET_NAME)
-                .key(key)
-                .build();
-        ResponseInputStream<GetObjectResponse> object = s3Client.getObject(getObjectRequest);
-        byte[] buffer;
+    /**
+     * Retrieves the file from S3 as a stream.
+     */
+    public ResponseInputStream<GetObjectResponse> download(String key) {
         try {
-            BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(key));
-            buffer = new byte[4096];
-            int bytesRead = -1;
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(BUCKET_NAME)
+                    .key(key)
+                    .build();
+            return s3Client.getObject(getObjectRequest);
+        } catch (SdkException e) {
 
-            while ((bytesRead = object.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            object.close();
-            outputStream.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to retrieve file from S3 for key " + key, e);
         }
-
-
-        return buffer;
     }
+
+    /**
+     * Downloads the file from S3 and returns its contents as a byte array.
+     */
+    public byte[] getFile(String key) {
+        try (ResponseInputStream<GetObjectResponse> s3Stream = download(key)) {
+            return s3Stream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading file from S3 for key " + key, e);
+        }
+    }
+    @Retryable(
+            include = { Exception.class },
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 5000)
+    )
     public boolean deleteFile(String key) {
             // Creating the DELETE request with all the relevant information.
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
