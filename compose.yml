@@ -46,6 +46,7 @@ services:
       SPRING_DATASOURCE_URL: ${RESOURCE_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${RESOURCEDB_USER}
       SPRING_DATASOURCE_PASSWORD: ${RESOURCEDB_PASSWORD}
+      AWS_URL: ${AWS_URL}
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
       EUREKA_URI: ${EUREKA_URI}
   eureka:
@@ -53,3 +54,16 @@ services:
     container_name: eureka
     ports:
       - "8761:8761"
+  localstack:
+    container_name: localstack
+    image: localstack/localstack
+    ports:
+      - "4566:4566"            # LocalStack Gateway
+      - "4510-4559:4510-4559"  # external services port range
+    environment:
+      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+      - DEBUG=${DEBUG:-0}
+    volumes:
+      - "./localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./localstack/init:/etc/localstack/init/ready.d"
