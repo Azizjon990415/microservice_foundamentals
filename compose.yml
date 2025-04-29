@@ -65,6 +65,15 @@ services:
       KAFKA_URL: ${KAFKA_URL}
       KAFKA_TOPIC_RESOURCE: ${KAFKA_TOPIC_RESOURCE}
       KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID}
+  api-gateway:
+    build: ./gateway
+    container_name: gateway
+    ports:
+      - "80:80"
+    environment:
+      EUREKA_URI: ${EUREKA_URI}
+    depends_on:
+      - eureka
   eureka:
     build: ./eureka
     container_name: eureka
