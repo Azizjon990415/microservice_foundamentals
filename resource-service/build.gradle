@@ -8,10 +8,15 @@ group = 'com.epam'
 version = '0.0.1-SNAPSHOT'
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
 }
+def javaConvention = project.convention.getPlugin(org.gradle.api.plugins.JavaPluginConvention)
+javaConvention.sourceCompatibility = JavaVersion.VERSION_17
+javaConvention.targetCompatibility = JavaVersion.VERSION_17
 
 configurations {
     compileOnly {
@@ -42,9 +47,15 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    testImplementation 'io.cucumber:cucumber-java:7.14.0'
+    testImplementation 'io.cucumber:cucumber-junit:7.14.0'
+    testImplementation 'io.cucumber:cucumber-spring:7.14.0'
+    testImplementation 'org.junit.vintage:junit-vintage-engine'
+    testImplementation 'io.findify:s3mock_2.13:0.2.6'
 
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    include '**/*Test.class'
 }
