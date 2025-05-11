@@ -11,6 +11,9 @@ public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column
+    private String state; // e.g., STAGING, PERMANENT
+    @Column
+    private String path; // File path in the storage
     // Getters and Setters
 }
