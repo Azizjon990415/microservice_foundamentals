@@ -75,7 +75,7 @@ public class ResourceService {
                 .filter(id -> !resourceRepository.existsById(id))
                 .toList();
         idList.removeAll(notFoundIds);
-        if (!awss3Service.deleteFiles(idList)){
+        if (!awss3Service.deleteFiles(idList)&&notFoundIds.isEmpty()) {
             throw new RuntimeException("Error deleting files");
         }
         return Map.of("ids", idList);

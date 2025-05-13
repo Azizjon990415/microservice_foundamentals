@@ -16,8 +16,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/resources")
 public class ResourceController {
-    @Autowired
+
     private ResourceService resourceService;
+    @Autowired
+    public ResourceController(ResourceService resourceService) {
+        this.resourceService = resourceService;
+    }
 
     @PostMapping(value = "", consumes = "audio/mpeg", produces = "application/json")
     public ResponseEntity<ResourceDTO> uploadResource(@RequestBody byte[] audioData) {

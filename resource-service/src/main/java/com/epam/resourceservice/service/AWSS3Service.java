@@ -33,7 +33,7 @@ public class AWSS3Service {
 
     private final String BUCKET_NAME;
     Region region = Region.US_EAST_1;
-    S3Client s3Client;
+    public S3Client s3Client;
 
     public AWSS3Service(@Value("${aws.bucket-name}") String bucketName, @Value("${aws.url}") String awsUrl, @Value("${aws.s3.secret-key}") String secretKey, @Value("${aws.s3.access-key}") String accessKey) {
         ACCESS_KEY = accessKey;

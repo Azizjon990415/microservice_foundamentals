@@ -3,10 +3,10 @@ package com.epam.resourceprocessor.DTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
 public class SongDTO {
     private Long resourceId;
     private String name;
@@ -23,6 +23,34 @@ public class SongDTO {
         this.duration = length;
         this.year = year;
     }
+
+    public SongDTO() {
+    }
+
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
+    }
+
     @JsonProperty
     public Long getResourceId() {
         return resourceId;
