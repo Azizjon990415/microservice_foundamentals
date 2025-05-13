@@ -1,7 +1,11 @@
 package com.epam.resourceservice.service;
 
+import com.epam.resourceservice.DTO.StorageDTO;
 import com.epam.resourceservice.entity.Resource;
+import com.epam.resourceservice.exception.ResourceNotFoundException;
+import com.epam.resourceservice.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -31,9 +35,13 @@ public class AWSS3Service {
 
     private final String AWS_URL;
 
-    private final String BUCKET_NAME;
+    private String BUCKET_NAME;
     Region region = Region.US_EAST_1;
     public S3Client s3Client;
+    @Autowired
+    private ResourceRepository resourceRepository;
+    @Autowired
+    private StorageServiceClient storageServiceClient;
 
     public AWSS3Service(@Value("${aws.bucket-name}") String bucketName, @Value("${aws.url}") String awsUrl, @Value("${aws.s3.secret-key}") String secretKey, @Value("${aws.s3.access-key}") String accessKey) {
         ACCESS_KEY = accessKey;
@@ -49,8 +57,13 @@ public class AWSS3Service {
 
                 .build();
     }
+
+    public void setBucketName(String bucketName) {
+        this.BUCKET_NAME = bucketName;
+    }
+
     @Retryable(
-            include = { Exception.class },
+            include = {Exception.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 5000)
     )
@@ -74,6 +87,7 @@ public class AWSS3Service {
         ResponseInputStream<GetObjectResponse> savedResponse = s3Client.getObject(getObjectRequest);
         return savedResponse != null && savedResponse.response() != null && savedResponse.response().getClass().equals(GetObjectResponse.class);
     }
+
     /**
      * Retrieves the file from S3 as a stream.
      */
@@ -100,34 +114,39 @@ public class AWSS3Service {
             throw new RuntimeException("Error reading file from S3 for key " + key, e);
         }
     }
+
     @Retryable(
-            include = { Exception.class },
+            include = {Exception.class},
             maxAttempts = 5,
             backoff = @Backoff(delay = 5000)
     )
-    public boolean deleteFile(String key) {
-            // Creating the DELETE request with all the relevant information.
-            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                    .bucket(BUCKET_NAME)
-                    .key(key)
-                    .build();
+    public boolean deleteFile(Long key) {
+        Resource resource = resourceRepository.findById(key).orElseThrow(() -> new ResourceNotFoundException("Resource not found"));
+        StorageDTO storage = storageServiceClient.getStorageByType(resource.getState());
+        setBucketName(storage.getBucket());
+        // Creating the DELETE request with all the relevant information.
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(BUCKET_NAME)
+                .key(key.toString())
+                .build();
 
-            // Deleting the object from the bucket.
-            s3Client.deleteObject(deleteObjectRequest);
+        // Deleting the object from the bucket.
+        s3Client.deleteObject(deleteObjectRequest);
         try {
             s3Client.headObject(HeadObjectRequest.builder()
                     .bucket(BUCKET_NAME)
-                    .key(key)
+                    .key(key.toString())
                     .build());
             return false; // File still exists
         } catch (NoSuchKeyException e) {
             return true; // File is deleted
         }
     }
+
     public boolean deleteFiles(List<Long> keys) {
         boolean allDeleted = true;
         for (Long key : keys) {
-            if (!deleteFile(key.toString())) {
+            if (!deleteFile(key)) {
                 allDeleted = false;
             }
         }
