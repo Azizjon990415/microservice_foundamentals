@@ -56,4 +56,6 @@ publishing {
 }
 tasks.named('test') {
     useJUnitPlatform()
+    exclude '**/BaseTestClass.class'
 }
+
