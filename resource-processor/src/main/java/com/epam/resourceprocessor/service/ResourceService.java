@@ -7,6 +7,7 @@ import com.epam.resourceprocessor.exception.BadRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.header.Header;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.XMPDM;
@@ -51,7 +52,8 @@ public class ResourceService {
 
     @KafkaListener(topics = "${kafka.topic.resource}", groupId = "${spring.kafka.consumer.group-id}")
     public void processResource(ConsumerRecord<String, String> record) {
-        String traceId = new String(record.headers().lastHeader("X-Trace-Id").value());
+        Header traceIdHeader = record.headers().lastHeader("X-Trace-Id");
+        String traceId = traceIdHeader != null ? new String(traceIdHeader.value()) : "default-trace-id";
         MDC.put("traceId", traceId);
         try {
             String resourceId = record.value();
