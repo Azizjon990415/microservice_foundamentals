@@ -18,6 +18,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -36,20 +37,25 @@ public class ResourceService {
     private String songServiceUrl;
     @Value("${resource.service.url}")
     private String resourceServiceUrl;
+    @Value("${storage.service.url}")
+    private String storageServiceUrl;
     @Autowired
     private  RestTemplate restTemplate ;
+    @Value("${kafka.topic.resource-processed}")
+    private String resourceProcessedTopic;
 
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @KafkaListener(topics ="${kafka.topic.resource}", groupId = "${spring.kafka.consumer.group-id}")
     public void processResource(String resourceId) {
         // Make synchronous call to Resource Service to retrieve resource data
         byte[] resourceData = getResourceData(resourceId);
 
-        // Extract metadata from resource
-        SongDTO songDTO = getSongMetaData(resourceId,resourceData);
-
-        // Make synchronous call to Song Service to save metadata
+        SongDTO songDTO = getSongMetaData(resourceId, resourceData);
         saveSongMetadata(songDTO);
+
+        notifyResourceService(resourceId);
     }
     @Retryable(value = { Exception.class }, maxAttempts = 5, backoff = @Backoff(delay = 2000))
     private Map saveSongMetadata(SongDTO songDTO) {
@@ -121,6 +127,14 @@ public class ResourceService {
             return "";
         }
     }
+
+
+
+    private void notifyResourceService(String resourceId) {
+        kafkaTemplate.send(resourceProcessedTopic, resourceId);
+    }
+
+
 }
 
 

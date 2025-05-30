@@ -22,6 +22,17 @@ services:
       - "5433:5432"
     volumes:
       - ./init-scripts/resource-db:/docker-entrypoint-initdb.d
+  storage-db:
+    image: postgres:16-alpine
+    container_name: storage-db
+    environment:
+      POSTGRES_DB: ${STORAGEDB_NAME}
+      POSTGRES_USER: ${STORAGEDB_USER}
+      POSTGRES_PASSWORD: ${STORAGEDB_PASSWORD}
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./init-scripts/storage-db:/docker-entrypoint-initdb.d
 
   song-service:
     build: ./song-service
@@ -43,6 +54,7 @@ services:
       - "8081:8081"
     environment:
       SONG_SERVICE_URL: ${SONG_SERVICE_URL}
+      STORAGE_SERVICE_URL: ${STORAGE_SERVICE_URL}
       SPRING_DATASOURCE_URL: ${RESOURCE_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${RESOURCEDB_USER}
       SPRING_DATASOURCE_PASSWORD: ${RESOURCEDB_PASSWORD}
@@ -52,6 +64,24 @@ services:
       KAFKA_URL: ${KAFKA_URL}
       KAFKA_TOPIC_RESOURCE: ${KAFKA_TOPIC_RESOURCE}
       KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID}
+      KAFKA_TOPIC_RESOURCE_PROCESSED: ${KAFKA_TOPIC_RESOURCE_PROCESSED}
+  storage-service:
+    build: ./storage-service
+    container_name: storage-service
+    ports:
+      - "8081:8081"
+    environment:
+      SONG_SERVICE_URL: ${SONG_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${RESOURCE_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${RESOURCEDB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${RESOURCEDB_PASSWORD}
+      AWS_URL: ${AWS_URL}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      EUREKA_URI: ${EUREKA_URI}
+      KAFKA_URL: ${KAFKA_URL}
+      KAFKA_TOPIC_RESOURCE: ${KAFKA_TOPIC_RESOURCE}
+      KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID}
+      KAFKA_TOPIC_RESOURCE_PROCESSED: ${KAFKA_TOPIC_RESOURCE_PROCESSED}
   resource-processor:
     build: ./resource-processor
     container_name: resource-processor
@@ -65,6 +95,7 @@ services:
       KAFKA_URL: ${KAFKA_URL}
       KAFKA_TOPIC_RESOURCE: ${KAFKA_TOPIC_RESOURCE}
       KAFKA_CONSUMER_GROUP_ID: ${KAFKA_CONSUMER_GROUP_ID}
+      KAFKA_TOPIC_RESOURCE_PROCESSED: ${KAFKA_TOPIC_RESOURCE_PROCESSED}
   api-gateway:
     build: ./gateway
     container_name: gateway

@@ -91,7 +91,7 @@ class AWSS3ServiceTests {
     void deletesFileSuccessfully() {
         when(s3Client.headObject(any(HeadObjectRequest.class))).thenThrow(NoSuchKeyException.class);
 
-        boolean result = awss3Service.deleteFile("test-key");
+        boolean result = awss3Service.deleteFile(1L);
 
         Assertions.assertTrue(result);
         verify(s3Client, times(1)).deleteObject(any(DeleteObjectRequest.class));
@@ -103,7 +103,7 @@ class AWSS3ServiceTests {
         when(s3Client.deleteObject(any(DeleteObjectRequest.class))).thenReturn(DeleteObjectResponse.builder().build());
         when(s3Client.headObject(any(HeadObjectRequest.class))).thenReturn(HeadObjectResponse.builder().build());
 
-        boolean result = awss3Service.deleteFile("test-key");
+        boolean result = awss3Service.deleteFile(1L);
 
         Assertions.assertFalse(result);
         verify(s3Client, times(1)).deleteObject(any(DeleteObjectRequest.class));
