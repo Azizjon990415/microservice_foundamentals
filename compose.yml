@@ -301,3 +301,12 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: start-dev
+    ports:
+      - "9090:8080"
