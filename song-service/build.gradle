@@ -39,6 +39,8 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier:3.1.8'
     testImplementation 'org.springframework.cloud:spring-cloud-contract-verifier:3.1.8'
     testImplementation 'org.junit.vintage:junit-vintage-engine'
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.3'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 contracts {
     baseClassForTests = 'com.epam.songservice.contract.BaseTestClass' // Replace with your base test class
